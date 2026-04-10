@@ -153,7 +153,7 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-8 animate-in fade-in duration-700">
-      <header className="flex items-start justify-between">
+      <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-3xl font-bold uppercase tracking-tight">PD Update</h2>
           <p className="text-slate-400 mt-1 uppercase text-[10px] font-bold tracking-[0.2em]">Select center and member to upload update details.</p>
@@ -194,13 +194,13 @@ export default function Dashboard() {
 
         {step === 2 && (
           <div className="space-y-4 animate-in fade-in duration-500">
-            <div className="flex items-center justify-between border-b border-white/10 pb-4">
-              <div className="flex items-center space-x-4">
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between border-b border-white/10 pb-4 gap-4">
+              <div className="flex items-center space-x-4 w-full">
                 <button type="button" onClick={() => setStep(1)} className="text-indigo-400 hover:indigo-300 font-bold flex items-center space-x-2"><FaArrowLeft /> <span>Back</span></button>
                 <label className="text-sm font-semibold text-indigo-300 uppercase tracking-widest block">2. Select Member</label>
               </div>
               
-              <div className="flex flex-col items-end space-y-2">
+              <div className="flex flex-col items-start md:items-end space-y-2 w-full md:w-auto">
                 {/* Zoom Status + Join */}
                 <div className="flex items-center gap-2">
                   {hostLinkStatus === 'live' && zoomLink ? (
@@ -212,13 +212,13 @@ export default function Dashboard() {
                     <span className="text-[9px] text-slate-500 animate-pulse">Loading...</span>
                   ) : null}
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 w-full">
                   <input 
                     type="text"
                     placeholder="Zoom link / Meeting ID..."
                     value={zoomLink}
                     onChange={(e) => { setZoomLink(e.target.value); localStorage.setItem('pd_zoom_link', e.target.value); }}
-                    className={`border text-[11px] px-3 py-1.5 rounded-lg text-white outline-none w-52 shadow-inner placeholder:text-slate-500 transition-all ${
+                    className={`border text-[11px] px-3 py-1.5 rounded-lg text-white outline-none w-full md:w-52 shadow-inner placeholder:text-slate-500 transition-all ${
                       zoomLink
                         ? 'bg-emerald-900/30 border-emerald-500/50 text-emerald-200'
                         : 'bg-slate-800 border-indigo-500/30'
@@ -244,7 +244,7 @@ export default function Dashboard() {
                       alert('Zoom link illai. Verifier set pannatum.');
                     }
                   }}
-                  className={`flex items-center space-x-2 px-5 py-2 rounded-xl text-sm font-bold shadow-lg transition-all hover:scale-105 active:scale-95 ${
+                  className={`flex items-center justify-center space-x-2 px-5 py-2 rounded-xl text-sm font-bold shadow-lg transition-all w-full md:w-auto hover:scale-105 active:scale-95 ${
                     zoomLink && zoomLink.trim() ? 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-500/20' : 'bg-slate-800 text-slate-500 shadow-none opacity-50 cursor-not-allowed'
                   }`}
                 >
