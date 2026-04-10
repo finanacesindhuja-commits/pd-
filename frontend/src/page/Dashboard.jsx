@@ -11,12 +11,42 @@ export default function Dashboard() {
   const [homeImage, setHomeImage] = useState(() => localStorage.getItem('pd_home') || null);
   const [sideImage, setSideImage] = useState(() => localStorage.getItem('pd_side') || null);
   const [zoomLink, setZoomLink] = useState(() => localStorage.getItem('pd_zoom_link') || '');
+  const [hostLinkStatus, setHostLinkStatus] = useState('loading'); // 'loading' | 'live' | 'none'
   const [loading, setLoading] = useState(false);
   const [membersLoading, setMembersLoading] = useState(false);
   const [message, setMessage] = useState('');
   const [step, setStep] = useState(() => Number(localStorage.getItem('pd_step')) || 1);
   const [refreshKey, setRefreshKey] = useState(0);
   const [isRefreshing, setIsRefreshing] = useState(false);
+
+  // Auto-fetch verifier host link — always override with latest from Supabase
+  const fetchHostLink = () => {
+    fetch(`${API}/api/get-host-link`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.link && data.link.trim()) {
+          setZoomLink(prev => {
+            if (prev !== data.link.trim()) {
+              localStorage.setItem('pd_zoom_link', data.link.trim());
+              return data.link.trim();
+            }
+            return prev;
+          });
+          setHostLinkStatus('live');
+        } else {
+          setHostLinkStatus('none');
+        }
+      })
+      .catch(() => setHostLinkStatus('none'));
+  };
+
+  useEffect(() => {
+    fetchHostLink(); // fetch immediately on mount
+
+    // Poll every 5 seconds for real-time sync
+    const interval = setInterval(fetchHostLink, 5000);
+    return () => clearInterval(interval); // cleanup on unmount
+  }, [refreshKey]);
 
   const handleRefresh = useCallback(() => {
     setIsRefreshing(true);
@@ -171,13 +201,28 @@ export default function Dashboard() {
               </div>
               
               <div className="flex flex-col items-end space-y-2">
+                {/* Zoom Status + Join */}
+                <div className="flex items-center gap-2">
+                  {hostLinkStatus === 'live' && zoomLink ? (
+                    <span className="flex items-center gap-1.5 text-[9px] font-black text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2 py-1 rounded-lg uppercase tracking-widest">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse inline-block"></span>
+                      Link Ready
+                    </span>
+                  ) : hostLinkStatus === 'loading' ? (
+                    <span className="text-[9px] text-slate-500 animate-pulse">Loading...</span>
+                  ) : null}
+                </div>
                 <div className="flex items-center gap-2">
                   <input 
                     type="text"
-                    placeholder="Enter Zoom ID or Link manually..."
+                    placeholder="Zoom link / Meeting ID..."
                     value={zoomLink}
-                    onChange={(e) => { setZoomLink(e.target.value); }}
-                    className="bg-slate-800 border border-indigo-500/30 text-[11px] px-3 py-1.5 rounded-lg text-white outline-none w-48 shadow-inner placeholder:text-slate-500"
+                    onChange={(e) => { setZoomLink(e.target.value); localStorage.setItem('pd_zoom_link', e.target.value); }}
+                    className={`border text-[11px] px-3 py-1.5 rounded-lg text-white outline-none w-52 shadow-inner placeholder:text-slate-500 transition-all ${
+                      zoomLink
+                        ? 'bg-emerald-900/30 border-emerald-500/50 text-emerald-200'
+                        : 'bg-slate-800 border-indigo-500/30'
+                    }`}
                   />
                 </div>
                 <button
@@ -191,19 +236,19 @@ export default function Dashboard() {
                       } else if (url.includes('.')) {
                         if (!/^https?:\/\//i.test(url)) url = `https://${url}`;
                       } else {
-                        alert('Please paste a valid Zoom URL (e.g. zoom.us/j/123) or a numeric Meeting ID.');
+                        alert('Valid Zoom URL or Meeting ID enter pannum.');
                         return;
                       }
                       window.open(url, '_blank', 'noopener,noreferrer');
                     } else {
-                      alert('Please paste a valid Zoom or Meeting link.');
+                      alert('Zoom link illai. Verifier set pannatum.');
                     }
                   }}
                   className={`flex items-center space-x-2 px-5 py-2 rounded-xl text-sm font-bold shadow-lg transition-all hover:scale-105 active:scale-95 ${
                     zoomLink && zoomLink.trim() ? 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-indigo-500/20' : 'bg-slate-800 text-slate-500 shadow-none opacity-50 cursor-not-allowed'
                   }`}
                 >
-                  <FaVideo /> <span>{zoomLink && zoomLink.trim() ? 'Join Zoom Meeting' : 'No Link Set'}</span>
+                  <FaVideo /> <span>Join Zoom Meeting</span>
                 </button>
               </div>
             </div>
@@ -231,7 +276,10 @@ export default function Dashboard() {
                     <div className="flex justify-between items-start">
                       <div>
                         <span className={`font-bold block ${m.isSubmitted ? 'text-slate-400 line-through' : 'text-white'}`}>{m.name}</span>
-                        <span className="text-slate-500 text-xs mt-1 block">ID: {m.id}</span>
+                        <div className="flex gap-2 items-center mt-1.5">
+                          <span className="text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest block">App: {m.appId}</span>
+                          <span className="text-slate-500 text-[10px] font-bold block">ID: {m.id}</span>
+                        </div>
                       </div>
                       {m.isSubmitted && (
                         <div className={`flex flex-col items-center justify-center p-2 rounded-full ${m.pdVerified ? 'text-emerald-500 bg-emerald-500/10' : 'text-amber-500 bg-amber-500/10'}`} title={m.pdVerified ? "Approved" : "Pending Verification"}>

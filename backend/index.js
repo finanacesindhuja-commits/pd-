@@ -65,7 +65,7 @@ app.get('/api/members/:centerId', async (req, res) => {
     // 1. Fetch members with approved loans
     const { data: loans, error: loansError } = await supabase
       .from('loans')
-      .select('member_id, member_name, mobile_no')
+      .select('member_id, member_name, mobile_no, loan_app_id')
       .eq('center_id', centerId)
       .eq('status', 'APPROVED');
 
@@ -88,6 +88,11 @@ app.get('/api/members/:centerId', async (req, res) => {
       });
     });
 
+    const memberIds = loans.map(l => l.member_id);
+    const { data: membersList } = await supabase.from('members').select('id, member_no').in('id', memberIds);
+    const memberMap = {};
+    if (membersList) membersList.forEach(m => memberMap[m.id] = m.member_no);
+
     // Extract unique members
     const uniqueMembers = [];
     const map = new Map();
@@ -98,6 +103,7 @@ app.get('/api/members/:centerId', async (req, res) => {
         
         uniqueMembers.push({ 
           id: String(loan.member_id), 
+          appId: memberMap[loan.member_id] || loan.loan_app_id || 'N/A',
           name: loan.member_name || 'Unknown', 
           phone: loan.mobile_no || 'N/A',
           isSubmitted: pdInfo.isSubmitted,
@@ -134,6 +140,26 @@ app.post('/api/submit-pd', async (req, res) => {
   } catch (err) {
     console.error('Submit PD Error:', err);
     res.status(500).json({ error: err.message });
+  }
+});
+
+// GET verifier's host link from Supabase (set by PD Verifier app)
+app.get('/api/get-host-link', async (req, res) => {
+  try {
+    const { data, error } = await supabase
+      .from('pd_verifications')
+      .select('zoom_link, created_at')
+      .eq('center_id', '__config__')
+      .eq('member_id', 'host_link')
+      .single();
+
+    if (error || !data || !data.zoom_link) {
+      return res.json({ link: '', updatedAt: null });
+    }
+    res.json({ link: data.zoom_link, updatedAt: data.created_at });
+  } catch (err) {
+    console.error('Get Host Link Error:', err);
+    res.json({ link: '', updatedAt: null });
   }
 });
 
