@@ -184,8 +184,9 @@ export default function Dashboard() {
             <label className="text-sm font-semibold text-indigo-300 uppercase tracking-widest border-b border-white/10 pb-2 block">1. Select Center</label>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {centers.map(c => (
-                <button key={c.id} type="button" onClick={() => { setSelectedCenter(c.id); setStep(2); }} className="p-6 rounded-2xl text-left bg-slate-800/80 border border-slate-700 hover:border-indigo-500 shadow-lg transition-all transform hover:-translate-y-1">
-                  <span className="font-bold text-lg text-white block">{c.name}</span>
+                <button key={c.id} type="button" onClick={() => { setSelectedCenter(c.id); setStep(2); }} className="p-6 rounded-2xl text-left bg-slate-800/80 border border-slate-700 hover:border-indigo-500 shadow-lg transition-all transform hover:-translate-y-1 group">
+                  <span className="font-black text-xl text-white block group-hover:text-indigo-400 transition-colors uppercase tracking-tight">{c.name}</span>
+                  <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Center ID: #{c.id}</span>
                 </button>
               ))}
             </div>
@@ -274,9 +275,9 @@ export default function Dashboard() {
                     }`}
                   >
                     <div className="flex justify-between items-start">
-                      <div>
-                        <span className={`font-bold block ${m.isSubmitted ? 'text-slate-400 line-through' : 'text-white'}`}>{m.name}</span>
-                        <div className="flex gap-2 items-center mt-1.5">
+                      <div className="flex-1">
+                        <span className={`font-black text-xl uppercase tracking-tight block leading-none mb-1 ${m.isSubmitted ? 'text-slate-500 line-through' : 'text-white'}`}>{m.name}</span>
+                        <div className="flex gap-2 items-center mt-2">
                           <span className="text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest block">App: {m.appId}</span>
                           <span className="text-slate-500 text-[10px] font-bold block">ID: {m.id}</span>
                         </div>
