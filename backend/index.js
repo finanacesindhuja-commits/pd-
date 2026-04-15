@@ -25,26 +25,57 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 
 // activeVerifierLink removed (no verifier)
 
-app.post('/api/login', (req, res) => {
+app.post('/api/login', async (req, res) => {
   const { staffId, password, role } = req.body;
   console.log('Login request:', { staffId, password, role });
   
   if (!staffId || !password) return res.status(400).json({ message: 'Missing fields' });
 
-  // For testing, let anything through
-  return res.status(200).json({ 
-    message: 'Login successful', 
-    role: role || 'Relationship Officer', 
-    staffId 
-  });
+  try {
+    const { data: staff, error } = await supabase
+      .from('staff')
+      .select('staff_id, password, role')
+      .ilike('staff_id', staffId)
+      .single();
+
+    if (error || !staff) {
+      return res.status(401).json({ message: 'Invalid Staff ID' });
+    }
+
+    // In a real application, consider using bcrypt.compare
+    if (staff.password !== password) {
+      return res.status(401).json({ message: 'Invalid Password' });
+    }
+
+    if (staff.role !== 'Relationship Officer') {
+      return res.status(401).json({ message: 'Unauthorized Role. Only Relationship Officers can access PD.' });
+    }
+
+    return res.status(200).json({ 
+      message: 'Login successful', 
+      role: staff.role, 
+      staffId: staff.staff_id 
+    });
+  } catch (err) {
+    console.error('Login error:', err);
+    return res.status(500).json({ message: 'Internal server error' });
+  }
 });
 
 app.get('/api/centers', async (req, res) => {
   try {
-    const { data: loans, error } = await supabase
+    const { staffId } = req.query;
+    
+    let query = supabase
       .from('loans')
       .select('center_id, center_name')
-      .eq('status', 'APPROVED');
+      .ilike('status', '%Ready for PD%');
+      
+    if (staffId) {
+      query = query.ilike('staff_id', '%' + staffId + '%');
+    }
+      
+    const { data: loans, error } = await query;
       
     if (error) throw error;
     
@@ -67,13 +98,20 @@ app.get('/api/centers', async (req, res) => {
 app.get('/api/members/:centerId', async (req, res) => {
   try {
     const { centerId } = req.params;
+    const { staffId } = req.query;
     
-    // 1. Fetch members with approved loans
-    const { data: loans, error: loansError } = await supabase
+    // 1. Fetch members with approved loans filtering by staffId
+    let query = supabase
       .from('loans')
       .select('member_id, member_name, mobile_no, loan_app_id')
       .eq('center_id', centerId)
-      .eq('status', 'APPROVED');
+      .ilike('status', '%Ready for PD%');
+
+    if (staffId) {
+      query = query.ilike('staff_id', '%' + staffId + '%');
+    }
+    
+    const { data: loans, error: loansError } = await query;
 
     if (loansError) throw loansError;
 

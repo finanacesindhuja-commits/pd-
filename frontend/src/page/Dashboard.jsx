@@ -8,8 +8,8 @@ export default function Dashboard() {
   const [members, setMembers] = useState([]);
   const [selectedCenter, setSelectedCenter] = useState(() => localStorage.getItem('pd_center') || '');
   const [selectedMember, setSelectedMember] = useState(() => localStorage.getItem('pd_member') || '');
-  const [homeImage, setHomeImage] = useState(() => localStorage.getItem('pd_home') || null);
-  const [sideImage, setSideImage] = useState(() => localStorage.getItem('pd_side') || null);
+  const [homeImage, setHomeImage] = useState(null);
+  const [sideImage, setSideImage] = useState(null);
   const [zoomLink, setZoomLink] = useState(() => localStorage.getItem('pd_zoom_link') || '');
   const [hostLinkStatus, setHostLinkStatus] = useState('loading'); // 'loading' | 'live' | 'none'
   const [loading, setLoading] = useState(false);
@@ -65,17 +65,14 @@ export default function Dashboard() {
     if (selectedMember) localStorage.setItem('pd_member', selectedMember);
     else localStorage.removeItem('pd_member');
   }, [selectedMember]);
-  useEffect(() => { 
-    if (homeImage) localStorage.setItem('pd_home', homeImage); 
-    else localStorage.removeItem('pd_home');
-  }, [homeImage]);
   useEffect(() => {
     localStorage.setItem('pd_zoom_link', zoomLink);
   }, [zoomLink]);
 
   // Fetch Centers
   useEffect(() => {
-    fetch(`${API}/api/centers?t=${Date.now()}`, { cache: 'no-store' })
+    const staffId = localStorage.getItem('staffId') || '';
+    fetch(`${API}/api/centers?staffId=${staffId}&t=${Date.now()}`, { cache: 'no-store' })
       .then(res => res.json())
       .then(data => setCenters(data))
       .catch(() => {});
@@ -85,7 +82,8 @@ export default function Dashboard() {
   useEffect(() => {
     if (selectedCenter) {
       setMembersLoading(true);
-      fetch(`${API}/api/members/${selectedCenter}?t=${Date.now()}`, { cache: 'no-store' })
+      const staffId = localStorage.getItem('staffId') || '';
+      fetch(`${API}/api/members/${selectedCenter}?staffId=${staffId}&t=${Date.now()}`, { cache: 'no-store' })
         .then(res => res.json())
         .then(data => {
           setMembers(data);

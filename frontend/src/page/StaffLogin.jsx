@@ -21,9 +21,9 @@ export default function StaffLogin() {
       return;
     }
 
-    // Role check to ensure only Relationship Officer or Manager can log in
-    if (role !== 'Relationship Officer' && role !== 'Manager') {
-      setError('Unauthorized Role. Access Denied.');
+    // Role check to ensure only Relationship Officer can log in
+    if (role !== 'Relationship Officer') {
+      setError('Unauthorized Role. Access Denied. Only Relationship Officers can login to PD Update.');
       return;
     }
 
@@ -36,7 +36,7 @@ export default function StaffLogin() {
         body: JSON.stringify({ staffId, password, role }),
       });
       const data = await res.json();
-      
+
       if (res.ok) {
         localStorage.setItem('role', data.role);
         localStorage.setItem('staffId', data.staffId);
@@ -63,7 +63,7 @@ export default function StaffLogin() {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-gradient-to-tr from-indigo-500 to-blue-400 mb-4 shadow-lg">
             <FaUserShield className="text-3xl text-white" />
           </div>
-          <h2 className="text-3xl font-extrabold tracking-tight">Staff Portal</h2>
+          <h2 className="text-3xl font-extrabold tracking-tight">PD Portal</h2>
           <p className="text-sm text-indigo-200 mt-2 opacity-80">Sign in to your authorized account</p>
         </div>
 
@@ -74,24 +74,6 @@ export default function StaffLogin() {
         )}
 
         <form onSubmit={handleLogin} className="space-y-6">
-          {/* Role Selection */}
-          <div className="space-y-2">
-            <label className="text-xs font-semibold text-indigo-300 uppercase tracking-wider">Role Access</label>
-            <div className="relative">
-              <select
-                value={role}
-                onChange={(e) => setRole(e.target.value)}
-                className="w-full bg-slate-800/50 border border-slate-600 text-white text-sm rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent block px-4 py-3 appearance-none transition-colors"
-              >
-                <option value="Relationship Officer">Relationship Officer</option>
-                <option value="Manager">Manager</option>
-              </select>
-              <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none">
-                <FaChevronDown className="text-slate-400 text-xs" />
-              </div>
-            </div>
-            <p className="text-[10px] text-indigo-300/60 mt-1 pl-1">Strictly restricted to Relationship Officer and Manager tiers.</p>
-          </div>
 
           {/* Staff ID Input */}
           <div className="space-y-2">
@@ -105,7 +87,7 @@ export default function StaffLogin() {
                 value={staffId}
                 onChange={(e) => setStaffId(e.target.value)}
                 className="w-full pl-11 pr-4 py-3 bg-slate-800/50 border border-slate-600 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-white placeholder-slate-500 transition-colors"
-                placeholder="Manager / RO ID"
+                placeholder="Relationship Officer ID"
               />
             </div>
           </div>
