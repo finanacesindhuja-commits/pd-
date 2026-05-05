@@ -34,7 +34,7 @@ app.post('/api/login', async (req, res) => {
   try {
     const { data: staff, error } = await supabase
       .from('staff')
-      .select('staff_id, password, role')
+      .select('staff_id, password, role, staff_name')
       .ilike('staff_id', staffId)
       .single();
 
@@ -54,7 +54,8 @@ app.post('/api/login', async (req, res) => {
     return res.status(200).json({ 
       message: 'Login successful', 
       role: staff.role, 
-      staffId: staff.staff_id 
+      staffId: staff.staff_id,
+      staffName: staff.staff_name || staff.staff_id 
     });
   } catch (err) {
     console.error('Login error:', err);

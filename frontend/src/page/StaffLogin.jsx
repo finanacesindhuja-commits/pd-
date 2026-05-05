@@ -40,6 +40,7 @@ export default function StaffLogin() {
       if (res.ok) {
         localStorage.setItem('role', data.role);
         localStorage.setItem('staffId', data.staffId);
+        localStorage.setItem('staffName', data.staffName);
         // All roles and staff now go directly to the PD Update Dashboard
         navigate('/dashboard');
       } else {

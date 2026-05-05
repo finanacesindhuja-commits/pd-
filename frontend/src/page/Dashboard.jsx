@@ -179,9 +179,23 @@ export default function Dashboard() {
   return (
     <div className="space-y-8 animate-in fade-in duration-700">
       <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <h2 className="text-3xl font-bold uppercase tracking-tight">PD Update</h2>
-          <p className="text-slate-400 mt-1 uppercase text-[10px] font-bold tracking-[0.2em]">Select center and member to upload update details.</p>
+        <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:gap-8">
+          <div>
+            <h2 className="text-3xl font-bold uppercase tracking-tight">PD Update</h2>
+            <p className="text-slate-400 mt-1 uppercase text-[10px] font-bold tracking-[0.2em]">Select center and member to upload update details.</p>
+          </div>
+          <div className="flex items-center gap-3 bg-white/5 border border-white/10 px-4 py-2 rounded-2xl">
+            <div className="w-10 h-10 rounded-full bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-indigo-400 shadow-inner">
+              <span className="font-black text-xs uppercase">RO</span>
+            </div>
+            <div>
+              <p className="text-[9px] font-black text-indigo-300 uppercase tracking-[0.2em] leading-none mb-1">Authenticated Officer</p>
+              <h3 className="text-sm font-black text-white leading-none uppercase tracking-tight">
+                {localStorage.getItem('staffName') || 'Unknown Officer'} 
+                <span className="text-indigo-400 ml-2 opacity-60">#{localStorage.getItem('staffId')}</span>
+              </h3>
+            </div>
+          </div>
         </div>
         <button
           type="button"
