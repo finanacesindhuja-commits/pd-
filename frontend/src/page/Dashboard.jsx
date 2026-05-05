@@ -10,6 +10,7 @@ export default function Dashboard() {
   const [selectedMember, setSelectedMember] = useState(() => localStorage.getItem('pd_member') || '');
   const [homeImage, setHomeImage] = useState(null);
   const [sideImage, setSideImage] = useState(null);
+  const [location, setLocation] = useState(null); // { lat, lng }
   const [zoomLink, setZoomLink] = useState(() => localStorage.getItem('pd_zoom_link') || '');
   const [hostLinkStatus, setHostLinkStatus] = useState('loading'); // 'loading' | 'live' | 'none'
   const [loading, setLoading] = useState(false);
@@ -120,6 +121,32 @@ export default function Dashboard() {
     if (file) compressImage(file, (base64) => type === 'home' ? setHomeImage(base64) : setSideImage(base64));
   };
 
+  const fetchLocation = () => {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser.");
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setLocation({
+          lat: position.coords.latitude,
+          lng: position.coords.longitude
+        });
+      },
+      (error) => {
+        console.error("Error getting location:", error);
+        alert("Location capture failed. Please enable location permissions.");
+      },
+      { enableHighAccuracy: true }
+    );
+  };
+
+  useEffect(() => {
+    if (step === 3) {
+      fetchLocation();
+    }
+  }, [step]);
+
   const handleSubmit = async (e) => {
     if (e) e.preventDefault();
     if (!selectedCenter || !selectedMember || !homeImage || !sideImage) {
@@ -136,7 +163,7 @@ export default function Dashboard() {
           memberId: selectedMember,
           homeImage,
           sideImage,
-          zoomLink,
+          location: location ? `${location.lat},${location.lng}` : 'N/A',
           staffId: localStorage.getItem('staffId')
         })
       });
@@ -211,19 +238,7 @@ export default function Dashboard() {
                     <span className="text-[9px] text-slate-500 animate-pulse">Loading...</span>
                   ) : null}
                 </div>
-                <div className="flex items-center gap-2 w-full">
-                  <input 
-                    type="text"
-                    placeholder="Zoom link / Meeting ID..."
-                    value={zoomLink}
-                    onChange={(e) => { setZoomLink(e.target.value); localStorage.setItem('pd_zoom_link', e.target.value); }}
-                    className={`border text-[11px] px-3 py-1.5 rounded-lg text-white outline-none w-full md:w-52 shadow-inner placeholder:text-slate-500 transition-all ${
-                      zoomLink
-                        ? 'bg-emerald-900/30 border-emerald-500/50 text-emerald-200'
-                        : 'bg-slate-800 border-indigo-500/30'
-                    }`}
-                  />
-                </div>
+
                 <button
                   type="button"
                   onClick={(e) => {
@@ -318,6 +333,29 @@ export default function Dashboard() {
                   </div>
                 </div>
               </div>
+
+              {/* Location Info */}
+              <div className="bg-slate-800/50 p-4 rounded-2xl border border-white/10 flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <div className="p-2 bg-indigo-500/20 rounded-lg text-indigo-400">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 10c0 4.993-5.538 10.161-7.327 11.712a1 1 0 0 1-1.346 0C9.538 20.161 4 14.993 4 10a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-black text-indigo-300 uppercase tracking-widest block">Current Location</span>
+                    <span className="text-xs font-mono text-slate-300">
+                      {location ? `${location.lat.toFixed(6)}, ${location.lng.toFixed(6)}` : 'Detecting...'}
+                    </span>
+                  </div>
+                </div>
+                <button 
+                  type="button" 
+                  onClick={fetchLocation}
+                  className="text-[10px] font-black text-indigo-400 hover:text-white uppercase tracking-widest bg-indigo-500/10 px-3 py-1.5 rounded-lg border border-indigo-500/20 transition-all"
+                >
+                  Refresh GPS
+                </button>
+              </div>
+
               <button type="submit" disabled={loading} className="w-full bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-700 hover:to-blue-700 text-white font-bold py-4 rounded-2xl flex items-center justify-center space-x-3 shadow-xl transition-all transform hover:-translate-y-1">
                 {loading ? <FaSpinner className="animate-spin" /> : <FaCheckCircle />}
                 <span>Submit PD Update</span>

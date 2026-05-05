@@ -163,7 +163,7 @@ app.get('/api/members/:centerId', async (req, res) => {
 });
 
 app.post('/api/submit-pd', async (req, res) => {
-  const { centerId, memberId, homeImage, sideImage, staffId, zoomLink } = req.body;
+  const { centerId, memberId, homeImage, sideImage, staffId, zoomLink, location } = req.body;
   try {
     const { data, error } = await supabase
       .from('pd_verifications')
@@ -174,6 +174,7 @@ app.post('/api/submit-pd', async (req, res) => {
         home_image: homeImage,
         side_image: sideImage,
         zoom_link: zoomLink,
+        location: location,
         status: 'Pending PD Update Verification' // Changed from Pending Loan Verification
       }])
       .select()
