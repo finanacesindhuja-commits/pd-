@@ -39,16 +39,18 @@ app.post('/api/login', async (req, res) => {
       .single();
 
     if (error || !staff) {
-      return res.status(401).json({ message: 'Invalid Staff ID' });
+      console.error('Login failed: User not found:', staffId);
+      return res.status(401).json({ message: `Staff ID "${staffId}" database-la illai.` });
     }
 
-    // In a real application, consider using bcrypt.compare
     if (staff.password !== password) {
-      return res.status(401).json({ message: 'Invalid Password' });
+      console.error('Login failed: Password mismatch for:', staffId);
+      return res.status(401).json({ message: 'Password thappu. Check pannunga.' });
     }
 
     if (staff.role?.toLowerCase() !== 'relationship officer') {
-      return res.status(401).json({ message: 'Unauthorized Role. Only Relationship Officers can access PD.' });
+      console.error('Login failed: Unauthorized role:', staff.role);
+      return res.status(401).json({ message: `Ungal role "${staff.role}" unauthorized. Relationship Officer-ukku mattume access undu.` });
     }
 
     return res.status(200).json({ 
