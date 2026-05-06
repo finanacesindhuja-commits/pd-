@@ -173,41 +173,40 @@ app.get('/api/members/:centerId', async (req, res) => {
 });
 
 app.post('/api/submit-pd', async (req, res) => {
-  const { centerId, memberId, homeImage, sideImage, staffId, zoomLink, location } = req.body;
+  const { centerId, memberId, homeImage, sideImage, staffId, zoomLink } = req.body;
   try {
-    // Ensure IDs are numbers if they look like numbers
-    const finalCenterId = isNaN(centerId) ? centerId : Number(centerId);
-    const finalMemberId = isNaN(memberId) ? memberId : Number(memberId);
+    // Ensure we have valid numeric IDs
+    const cId = parseInt(centerId);
+    const mId = parseInt(memberId);
 
-    console.log('Attempting insert for:', { finalCenterId, finalMemberId, staffId });
-    
-    const { data, error } = await supabase
+    if (isNaN(cId) || isNaN(mId)) {
+      return res.status(400).json({ error: 'Invalid center or member ID format' });
+    }
+
+    const { error } = await supabase
       .from('pd_verifications')
       .insert({
-        center_id: finalCenterId,
-        member_id: finalMemberId,
-        staff_id: String(staffId || 'RO'),
+        center_id: cId,
+        member_id: mId,
+        staff_id: String(staffId || '1'),
         home_image: homeImage,
         side_image: sideImage,
-        zoom_link: zoomLink || null,
         status: 'Pending PD Verification'
-      })
-      .select();
+      });
 
     if (error) {
-      console.error('Supabase Insert Error FULL:', JSON.stringify(error, null, 2));
+      console.error('Supabase Error Details:', error);
       return res.status(500).json({ 
-        error: error.message, 
-        code: error.code,
-        details: error.details,
-        hint: error.hint,
-        fullError: error
+        message: 'Database insert failed',
+        error: error.message,
+        details: error.details
       });
     }
-    res.json({ message: 'Submission successful', submission: data });
+
+    res.json({ message: 'Submission successful' });
   } catch (err) {
     console.error('Submit PD Error:', err);
-    res.status(500).json({ error: err.message, stack: err.stack });
+    res.status(500).json({ error: err.message });
   }
 });
 
