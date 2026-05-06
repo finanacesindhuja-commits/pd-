@@ -5,6 +5,8 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+console.log('--- PD Update Backend UPDATED VERSION 3.0 STARTED ---');
+
 const allowedOrigin = process.env.ALLOWED_ORIGIN || '*';
 app.use(cors({
   origin: allowedOrigin,
