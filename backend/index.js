@@ -73,9 +73,8 @@ app.get('/api/centers', async (req, res) => {
       .from('loans')
       .select('center_id, center_name')
       .ilike('status', '%Ready for PD%');
-      
     if (staffId) {
-      query = query.ilike('staff_id', '%' + staffId + '%');
+      query = query.eq('staff_id', staffId.trim());
     }
       
     const { data: loans, error } = await query;
@@ -109,9 +108,8 @@ app.get('/api/members/:centerId', async (req, res) => {
       .select('member_id, member_name, mobile_no, loan_app_id')
       .eq('center_id', centerId)
       .ilike('status', '%Ready for PD%');
-
     if (staffId) {
-      query = query.ilike('staff_id', '%' + staffId + '%');
+      query = query.eq('staff_id', staffId.trim());
     }
     
     const { data: loans, error: loansError } = await query;

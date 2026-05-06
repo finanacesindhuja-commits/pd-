@@ -145,7 +145,18 @@ export default function Dashboard() {
     if (step === 3) {
       fetchLocation();
     }
+    // Clear images when moving away from submission step to avoid leaking images to next member
+    if (step === 2) {
+      setHomeImage(null);
+      setSideImage(null);
+    }
   }, [step]);
+
+  // Also clear images whenever a new member is selected
+  useEffect(() => {
+    setHomeImage(null);
+    setSideImage(null);
+  }, [selectedMember]);
 
   const handleSubmit = async (e) => {
     if (e) e.preventDefault();
@@ -169,7 +180,11 @@ export default function Dashboard() {
       });
       if (res.ok) {
         setMessage('Successfully submitted for PD Update verification!');
-        setHomeImage(null); setSideImage(null); setSelectedMember('');
+        setHomeImage(null); 
+        setSideImage(null); 
+        setSelectedMember('');
+        // Re-fetch members to show PENDING status and disable the submitted member
+        handleRefresh();
         setStep(2);
       }
     } catch (err) { setMessage('Submission failed.'); }
