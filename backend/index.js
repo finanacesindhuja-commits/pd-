@@ -210,6 +210,11 @@ app.post('/api/submit-pd', async (req, res) => {
   }
 });
 
+const path = require('path');
+
+// Serve static files from the frontend/dist directory
+app.use(express.static(path.join(__dirname, '../frontend/dist')));
+
 // GET verifier's host link from Supabase (set by PD Verifier app)
 app.get('/api/get-host-link', async (req, res) => {
   try {
@@ -228,6 +233,11 @@ app.get('/api/get-host-link', async (req, res) => {
     console.error('Get Host Link Error:', err);
     res.json({ link: '', updatedAt: null });
   }
+});
+
+// Catch-all route to serve the frontend index.html for any non-API routes
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/dist/index.html'));
 });
 
 app.listen(PORT, '0.0.0.0', () => {
