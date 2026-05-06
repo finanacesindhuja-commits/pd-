@@ -31,12 +31,12 @@ app.post('/api/login', async (req, res) => {
   
   if (!staffId || !password) return res.status(400).json({ message: 'Missing fields' });
 
-  try {
-    const { data: staff, error } = await supabase
-      .from('staff')
-      .select('*')
-      .ilike('staff_id', staffId.trim())
-      .single();
+    try {
+      const { data: staff, error } = await supabase
+        .from('staff')
+        .select('*')
+        .ilike('staff_id', String(staffId).trim())
+        .single();
 
     if (error || !staff) {
       console.error('Login failed: User not found:', staffId);
@@ -74,7 +74,7 @@ app.get('/api/centers', async (req, res) => {
       .select('center_id, center_name')
       .ilike('status', '%Ready for PD%');
     if (staffId) {
-      query = query.eq('staff_id', staffId.trim());
+      query = query.eq('staff_id', String(staffId).trim());
     }
       
     const { data: loans, error } = await query;
@@ -109,7 +109,7 @@ app.get('/api/members/:centerId', async (req, res) => {
       .eq('center_id', centerId)
       .ilike('status', '%Ready for PD%');
     if (staffId) {
-      query = query.eq('staff_id', staffId.trim());
+      query = query.eq('staff_id', String(staffId).trim());
     }
     
     const { data: loans, error: loansError } = await query;
@@ -133,10 +133,19 @@ app.get('/api/members/:centerId', async (req, res) => {
       });
     });
 
-    const memberIds = loans.map(l => l.member_id);
-    const { data: membersList } = await supabase.from('members').select('id, member_no').in('id', memberIds);
+    const memberIds = loans.map(l => l.member_id).filter(id => id != null);
     const memberMap = {};
-    if (membersList) membersList.forEach(m => memberMap[m.id] = m.member_no);
+    
+    if (memberIds.length > 0) {
+      const { data: membersList, error: membersError } = await supabase
+        .from('members')
+        .select('id, member_no')
+        .in('id', memberIds);
+        
+      if (!membersError && membersList) {
+        membersList.forEach(m => memberMap[m.id] = m.member_no);
+      }
+    }
 
     // Extract unique members
     const uniqueMembers = [];
@@ -166,26 +175,39 @@ app.get('/api/members/:centerId', async (req, res) => {
 app.post('/api/submit-pd', async (req, res) => {
   const { centerId, memberId, homeImage, sideImage, staffId, zoomLink, location } = req.body;
   try {
+    // Ensure IDs are numbers if they look like numbers
+    const finalCenterId = isNaN(centerId) ? centerId : Number(centerId);
+    const finalMemberId = isNaN(memberId) ? memberId : Number(memberId);
+
+    console.log('Attempting insert for:', { finalCenterId, finalMemberId, staffId });
+    
     const { data, error } = await supabase
       .from('pd_verifications')
-      .insert([{
-        center_id: centerId,
-        member_id: memberId,
-        staff_id: staffId || 'unknown',
+      .insert({
+        center_id: finalCenterId,
+        member_id: finalMemberId,
+        staff_id: String(staffId || 'RO'),
         home_image: homeImage,
         side_image: sideImage,
-        zoom_link: zoomLink,
-        location: location,
-        status: 'Pending PD Update Verification' // Changed from Pending Loan Verification
-      }])
-      .select()
-      .single();
+        zoom_link: zoomLink || null,
+        status: 'Pending PD Verification'
+      })
+      .select();
 
-    if (error) throw error;
+    if (error) {
+      console.error('Supabase Insert Error FULL:', JSON.stringify(error, null, 2));
+      return res.status(500).json({ 
+        error: error.message, 
+        code: error.code,
+        details: error.details,
+        hint: error.hint,
+        fullError: error
+      });
+    }
     res.json({ message: 'Submission successful', submission: data });
   } catch (err) {
     console.error('Submit PD Error:', err);
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ error: err.message, stack: err.stack });
   }
 });
 
