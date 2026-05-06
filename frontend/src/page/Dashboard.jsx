@@ -197,9 +197,15 @@ export default function Dashboard() {
       if (res.ok) {
         setMessage('Successfully submitted for PD Update verification!');
         setHomeImage(null); 
-        setSideImage(null); 
+        setSideImage(null);
+        
+        // Immediately update local state to reflect submission and lock the member
+        setMembers(prev => prev.map(m => 
+          m.id === selectedMember ? { ...m, isSubmitted: true } : m
+        ));
+        
         setSelectedMember('');
-        // Re-fetch members to show PENDING status and disable the submitted member
+        // Re-fetch members to sync with server
         handleRefresh();
         setStep(2);
       }
