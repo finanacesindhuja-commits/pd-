@@ -296,44 +296,55 @@ export default function Dashboard() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {membersLoading ? (
-                <div className="col-span-full flex justify-center py-10">
-                  <FaSpinner className="text-3xl animate-spin text-indigo-500" />
-                </div>
-              ) : members.length === 0 ? (
-                <p className="text-slate-500 text-sm col-span-full text-center py-10">No members found.</p>
-              ) : (
-                members.map(m => (
-                  <button 
-                    key={m.id} 
-                    type="button" 
-                    onClick={() => { setSelectedMember(m.id); setStep(3); }} 
-                    disabled={m.isSubmitted}
-                    className={`p-6 rounded-2xl text-left border transition-all shadow-lg transform hover:-translate-y-1 ${
-                      m.isSubmitted 
-                        ? 'bg-slate-900/50 border-slate-800 opacity-60 cursor-not-allowed' 
-                        : 'bg-slate-800 border border-slate-700 hover:border-blue-500'
-                    }`}
-                  >
-                    <div className="flex justify-between items-start">
-                      <div className="flex-1">
-                        <span className={`font-black text-xl uppercase tracking-tight block leading-none mb-1 ${m.isSubmitted ? 'text-slate-500 line-through' : 'text-white'}`}>{m.name}</span>
-                        <div className="flex gap-2 items-center mt-2">
-                          <span className="text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest block">App: {m.appId}</span>
-                          <span className="text-slate-500 text-[10px] font-bold block">ID: {m.id}</span>
+            <div className="max-h-[60vh] overflow-y-auto pr-2 custom-scrollbar">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {membersLoading ? (
+                  <div className="col-span-full flex justify-center py-10">
+                    <FaSpinner className="text-3xl animate-spin text-indigo-500" />
+                  </div>
+                ) : members.length === 0 ? (
+                  <p className="text-slate-500 text-sm col-span-full text-center py-10">No members found.</p>
+                ) : (
+                  members.map(m => (
+                    <button 
+                      key={m.id} 
+                      type="button" 
+                      onClick={() => { if(!m.isSubmitted) { setSelectedMember(m.id); setStep(3); } }} 
+                      disabled={m.isSubmitted}
+                      className={`p-6 rounded-2xl text-left border transition-all shadow-lg transform ${
+                        m.isSubmitted 
+                          ? 'bg-slate-900/50 border-slate-800 opacity-80 cursor-not-allowed' 
+                          : 'bg-slate-800 border border-slate-700 hover:border-blue-500 hover:-translate-y-1'
+                      }`}
+                    >
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <span className={`font-black text-xl uppercase tracking-tight block leading-none mb-1 ${m.isSubmitted ? 'text-slate-500' : 'text-white'}`}>{m.name}</span>
+                          <div className="flex gap-2 items-center mt-2">
+                            <span className="text-amber-500 bg-amber-500/10 px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest block">App: {m.appId}</span>
+                            <span className="text-slate-500 text-[10px] font-bold block">ID: {m.id}</span>
+                          </div>
                         </div>
+                        {m.isSubmitted && (
+                          <div className={`flex flex-col items-center justify-center p-2 rounded-xl min-w-[70px] ${m.pdVerified ? 'text-emerald-400 bg-emerald-500/10 border border-emerald-500/20' : 'text-amber-400 bg-amber-500/10 border border-amber-500/20'}`} title={m.pdVerified ? "Approved" : "Pending Verification"}>
+                            {m.pdVerified ? (
+                              <>
+                                <FaCheckCircle className="text-xl mb-1" />
+                                <span className="text-[8px] font-black tracking-widest uppercase">APPROVED</span>
+                              </>
+                            ) : (
+                              <>
+                                <FaSyncAlt className="text-xl mb-1 animate-spin-slow" />
+                                <span className="text-[8px] font-black tracking-widest uppercase">PENDING</span>
+                              </>
+                            )}
+                          </div>
+                        )}
                       </div>
-                      {m.isSubmitted && (
-                        <div className={`flex flex-col items-center justify-center p-2 rounded-full ${m.pdVerified ? 'text-emerald-500 bg-emerald-500/10' : 'text-amber-500 bg-amber-500/10'}`} title={m.pdVerified ? "Approved" : "Pending Verification"}>
-                          {m.pdVerified ? <FaCheckCircle className="text-xl" /> : <FaSyncAlt className="text-xl mb-1 animate-spin-slow" />}
-                          {!m.pdVerified && <span className="text-[10px] font-bold tracking-wider">PENDING</span>}
-                        </div>
-                      )}
-                    </div>
-                  </button>
-                ))
-              )}
+                    </button>
+                  ))
+                )}
+              </div>
             </div>
           </div>
         )}
