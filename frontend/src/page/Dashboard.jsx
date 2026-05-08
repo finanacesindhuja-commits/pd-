@@ -190,7 +190,8 @@ export default function Dashboard() {
           memberId: selectedMember,
           homeImage,
           sideImage,
-          staffId: localStorage.getItem('staffId')
+          staffId: localStorage.getItem('staffId'),
+          location: capturedLocation
         })
       });
       const data = await res.json();

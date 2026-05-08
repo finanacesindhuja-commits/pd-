@@ -175,7 +175,7 @@ app.get('/api/members/:centerId', async (req, res) => {
 });
 
 app.post('/api/submit-pd', async (req, res) => {
-  const { centerId, memberId, homeImage, sideImage, staffId, zoomLink } = req.body;
+  const { centerId, memberId, homeImage, sideImage, staffId, location } = req.body;
   try {
     // Ensure we have valid numeric IDs
     const cId = parseInt(centerId);
@@ -193,6 +193,7 @@ app.post('/api/submit-pd', async (req, res) => {
         staff_id: String(staffId || '1'),
         home_image: homeImage,
         side_image: sideImage,
+        location: location || 'N/A',
         status: 'Pending PD Verification'
       });
 
