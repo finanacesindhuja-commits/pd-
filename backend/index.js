@@ -239,7 +239,7 @@ app.get('/api/get-host-link', async (req, res) => {
 });
 
 // Catch-all route to serve the frontend index.html for any non-API routes
-app.get('*', (req, res) => {
+app.get('(.*)', (req, res) => {
   res.sendFile(path.join(frontendPath, 'index.html'));
 });
 
