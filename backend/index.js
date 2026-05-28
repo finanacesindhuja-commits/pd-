@@ -1,8 +1,29 @@
 const express = require('express');
+const compression = require('compression');
+const NodeCache = require('node-cache');
 const cors = require('cors');
 require('dotenv').config();
 
 const app = express();
+
+const cache = new NodeCache({ stdTTL: 15 });
+const flushCache = () => cache.flushAll();
+const cacheMiddleware = (duration = 15) => (req, res, next) => {
+  if (req.method !== 'GET') return next();
+  const key = req.originalUrl;
+  const cachedResponse = cache.get(key);
+  if (cachedResponse) return res.json(cachedResponse);
+  res.sendResponse = res.json;
+  res.json = (body) => {
+    if (res.statusCode >= 200 && res.statusCode < 300) {
+      cache.set(key, body, duration);
+    }
+    res.sendResponse(body);
+  };
+  next();
+};
+
+app.use(compression());
 const PORT = process.env.PORT || 5000;
 
 console.log('--- PD Update Backend UPDATED VERSION 3.0 STARTED ---');
@@ -67,7 +88,7 @@ app.post('/api/login', async (req, res) => {
   }
 });
 
-app.get('/api/centers', async (req, res) => {
+app.get('/api/centers', cacheMiddleware(10), async (req, res) => {
   try {
     const { staffId } = req.query;
     

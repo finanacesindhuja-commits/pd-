@@ -14,9 +14,11 @@
   "type": "commonjs",
   "dependencies": {
     "@supabase/supabase-js": "^2.100.1",
+    "compression": "^1.8.1",
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",
-    "express": "^5.2.1"
+    "express": "^5.2.1",
+    "node-cache": "^5.1.2"
   },
   "devDependencies": {
     "nodemon": "^3.1.14"
