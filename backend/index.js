@@ -58,7 +58,7 @@ app.post('/api/login', async (req, res) => {
       const { data: staff, error } = await supabase
         .from('staff')
         .select('*')
-        .ilike('staff_id', String(staffId).trim())
+        .eq('staff_id', String(staffId || '').trim().toUpperCase())
         .single();
 
     if (error || !staff) {
