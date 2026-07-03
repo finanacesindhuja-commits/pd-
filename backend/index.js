@@ -128,7 +128,7 @@ app.get('/api/members/:centerId', async (req, res) => {
     // 1. Fetch members with approved loans filtering by staffId
     let query = supabase
       .from('loans')
-      .select('member_id, member_name, mobile_no, loan_app_id')
+      .select('member_id, member_name, mobile_no')
       .eq('center_id', centerId)
       .ilike('status', '%Ready for PD%');
     if (staffId) {
