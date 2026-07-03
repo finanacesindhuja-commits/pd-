@@ -75,8 +75,8 @@ export default function Dashboard() {
     const staffId = localStorage.getItem('staffId') || '';
     fetch(`${API}/api/centers?staffId=${staffId}&t=${Date.now()}`, { cache: 'no-store' })
       .then(res => res.json())
-      .then(data => setCenters(data))
-      .catch(() => {});
+      .then(data => setCenters(Array.isArray(data) ? data : []))
+      .catch(() => setCenters([]));
   }, [refreshKey]);
 
   // Fetch Members
@@ -87,10 +87,10 @@ export default function Dashboard() {
       fetch(`${API}/api/members/${selectedCenter}?staffId=${staffId}&t=${Date.now()}`, { cache: 'no-store' })
         .then(res => res.json())
         .then(data => {
-          setMembers(data);
+          setMembers(Array.isArray(data) ? data : []);
           setMembersLoading(false);
         })
-        .catch(() => setMembersLoading(false));
+        .catch(() => { setMembers([]); setMembersLoading(false); });
     } else {
       setMembers([]);
     }
@@ -261,12 +261,15 @@ export default function Dashboard() {
           <div className="space-y-4 animate-in fade-in duration-500">
             <label className="text-sm font-semibold text-indigo-300 uppercase tracking-widest border-b border-white/10 pb-2 block">1. Select Center</label>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {centers.map(c => (
+              {Array.isArray(centers) && centers.map(c => (
                 <button key={c.id} type="button" onClick={() => { setSelectedCenter(c.id); setStep(2); }} className="p-6 rounded-2xl text-left bg-slate-800/80 border border-slate-700 hover:border-indigo-500 shadow-lg transition-all transform hover:-translate-y-1 group">
                   <span className="font-black text-xl text-white block group-hover:text-indigo-400 transition-colors uppercase tracking-tight">{c.name}</span>
                   <span className="text-[10px] text-slate-500 font-bold uppercase tracking-widest mt-1">Center ID: #{c.id}</span>
                 </button>
               ))}
+              {!Array.isArray(centers) || centers.length === 0 ? (
+                <p className="text-slate-500 text-sm col-span-full">No centers found.</p>
+              ) : null}
             </div>
           </div>
         )}
@@ -325,7 +328,7 @@ export default function Dashboard() {
                 <div className="col-span-full flex justify-center py-10">
                   <FaSpinner className="text-3xl animate-spin text-indigo-500" />
                 </div>
-              ) : members.length === 0 ? (
+              ) : !Array.isArray(members) || members.length === 0 ? (
                 <p className="text-slate-500 text-sm col-span-full text-center py-10">No members found.</p>
               ) : (
                 members.map(m => (
