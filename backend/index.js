@@ -180,7 +180,7 @@ app.get('/api/members/:centerId', async (req, res) => {
         
         uniqueMembers.push({ 
           id: String(loan.member_id), 
-          appId: memberMap[loan.member_id] || loan.loan_app_id || 'N/A',
+          appId: memberMap[loan.member_id] || 'N/A',
           name: loan.member_name || 'Unknown', 
           phone: loan.mobile_no || 'N/A',
           isSubmitted: pdInfo.isSubmitted,
