@@ -84,7 +84,7 @@ export default function Dashboard() {
     if (selectedCenter) {
       setMembersLoading(true);
       const staffId = localStorage.getItem('staffId') || '';
-      fetch(`${API}/api/members/${selectedCenter}?staffId=${staffId}&t=${Date.now()}`, { cache: 'no-store' })
+      fetch(`${API}/api/members/${encodeURIComponent(selectedCenter)}?staffId=${staffId}&t=${Date.now()}`, { cache: 'no-store' })
         .then(res => res.json())
         .then(data => {
           setMembers(Array.isArray(data) ? data : []);
