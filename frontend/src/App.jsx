@@ -1,11 +1,11 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import StaffLogin from './page/StaffLogin';
 import Dashboard from './page/Dashboard';
 import Layout from './components/Layout';
 
 function App() {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <Routes>
         <Route path="/" element={<Navigate to="/login" replace />} />
         <Route path="/login" element={<StaffLogin />} />
@@ -15,7 +15,7 @@ function App() {
         {/* Catch-all route to prevent 'No routes matched location' errors */}
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
-    </BrowserRouter>
+    </HashRouter>
   );
 }
 
